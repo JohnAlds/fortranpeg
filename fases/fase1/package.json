@@ -1,0 +1,13 @@
+{
+  "name": "fase1",
+  "version": "1.0.0",
+  "description": "Project OLC2 | USAC using Pegjs",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generated" : "node ./tools/Generator.js"
+  },
+  "author": "Kevin Cambara, River Roman, Johnny Aldana",
+  "license": "ISC"
+}
