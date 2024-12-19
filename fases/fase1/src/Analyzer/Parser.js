@@ -7,7 +7,7 @@
     import { ids, usos} from '../index.js'
     import ErrorReglas from './Error.js';
     import { errores } from '../index.js'
-    import * as n from '../Visitor/CST.js';
+    import * as n from '../Visitor/Cst.js';
 
 function peg$subclass(child, parent) {
   function C() { this.constructor = child; }
@@ -303,7 +303,10 @@ function peg$parse(input, options) {
         return `${inicio}-${fin}`;
     };
   var peg$f9 = function() { return text()};
-  var peg$f10 = function() { return text() };
+  var peg$f10 = function(val) {
+    return new n.Integer(parseInt(val.join('')));
+};
+  var peg$f11 = function() { return text() };
   var peg$currPos = options.peg$currPos | 0;
   var peg$savedPos = peg$currPos;
   var peg$posDetailsCache = [{ line: 1, column: 1 }];
@@ -933,6 +936,9 @@ function peg$parse(input, options) {
               } else {
                 s0 = peg$FAILED;
                 if (peg$silentFails === 0) { peg$fail(peg$e11); }
+              }
+              if (s0 === peg$FAILED) {
+                s0 = peg$parsenumero();
               }
             }
           }
@@ -1676,30 +1682,36 @@ function peg$parse(input, options) {
   }
 
   function peg$parsenumero() {
-    var s0, s1;
+    var s0, s1, s2;
 
-    s0 = [];
-    s1 = input.charAt(peg$currPos);
-    if (peg$r9.test(s1)) {
+    s0 = peg$currPos;
+    s1 = [];
+    s2 = input.charAt(peg$currPos);
+    if (peg$r9.test(s2)) {
       peg$currPos++;
     } else {
-      s1 = peg$FAILED;
+      s2 = peg$FAILED;
       if (peg$silentFails === 0) { peg$fail(peg$e30); }
     }
-    if (s1 !== peg$FAILED) {
-      while (s1 !== peg$FAILED) {
-        s0.push(s1);
-        s1 = input.charAt(peg$currPos);
-        if (peg$r9.test(s1)) {
+    if (s2 !== peg$FAILED) {
+      while (s2 !== peg$FAILED) {
+        s1.push(s2);
+        s2 = input.charAt(peg$currPos);
+        if (peg$r9.test(s2)) {
           peg$currPos++;
         } else {
-          s1 = peg$FAILED;
+          s2 = peg$FAILED;
           if (peg$silentFails === 0) { peg$fail(peg$e30); }
         }
       }
     } else {
-      s0 = peg$FAILED;
+      s1 = peg$FAILED;
     }
+    if (s1 !== peg$FAILED) {
+      peg$savedPos = s0;
+      s1 = peg$f10(s1);
+    }
+    s0 = s1;
 
     return s0;
   }
@@ -1735,7 +1747,7 @@ function peg$parse(input, options) {
         }
       }
       peg$savedPos = s0;
-      s0 = peg$f10();
+      s0 = peg$f11();
     } else {
       peg$currPos = s0;
       s0 = peg$FAILED;

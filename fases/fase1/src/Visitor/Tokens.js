@@ -51,4 +51,18 @@ end module tokenizer
     end if
     `;
     }
+
+    visitInteger(node) {
+        const stringVal = node.val.toString();
+        const length = stringVal.length;
+        return ` 
+        if ("${stringVal}" == input(cursor:cursor + ${length - 1})) then !Foo
+            allocate(character(len=${length}) :: lexeme)
+            lexeme = input(cursor:cursor + ${length - 1})
+            cursor = cursor + ${length}
+            return
+        end if
+        `;
+    }
+    
 }

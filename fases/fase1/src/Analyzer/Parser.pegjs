@@ -2,7 +2,7 @@
     import { ids, usos} from '../index.js'
     import ErrorReglas from './Error.js';
     import { errores } from '../index.js'
-    import * as n from '../Visitor/CST.js';
+    import * as n from '../Visitor/Cst.js';
 }}
 
 gramatica
@@ -41,7 +41,7 @@ expresion
     return new n.Expresion(expr, label, qty);
   }
 
-etiqueta = ("@")? _ id:identificador _ ":" (varios)?
+etiqueta = ("@")? _ id:identificador _ ":" (varios)? 
 
 varios = ("!"/"$"/"@"/"&")
 
@@ -57,6 +57,7 @@ expresiones
   / corchetes "i"?
   / "."
   / "!."
+  / numero
 
 // conteo = "|" parteconteo _ (_ delimitador )? _ "|"
 
@@ -130,9 +131,12 @@ escape = "'"
 
 secuenciaFinLinea = "\r\n" / "\n" / "\r" / "\u2028" / "\u2029"
 
-numero = [0-9]+
+numero = val:[0-9]+ {
+    return new n.Integer(parseInt(val.join('')));
+}
 
 identificador = [_a-z]i[_a-z0-9]i* { return text() }
+
 
 _ = (Comentarios /[ \t\n\r])*
 

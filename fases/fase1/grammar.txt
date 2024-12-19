@@ -1,107 +1,57 @@
-start
-  = instrucciones
-  
-instrucciones
-  = instruccion+
+// Code compiler module
 
-instruccion
-  =  _ production _ ";"?
-;
+module tokenizer
+implicit none
 
-production
-  = id _ string? _ "=" _ block_expression  _ 
-;
+contains
+function nextSym(input, cursor) result(lexeme)
+    character(len=*), intent(in) :: input
+    integer, intent(inout) :: cursor
+    character(len=:), allocatable :: lexeme
 
-block_expression
-  =  (label _ ":")? _ op? _ term _ signo? ( (label _ ":")? _ op? term _ signo?)*  ( _ "/" _ (label _ ":")? op? _ term _ signo? ( _ ( label _ ":")? _ op?_ term _ signo?)*  )*
+    if (cursor > len(input)) then
+        allocate( character(len=3) :: lexeme )
+        lexeme = "EOF"
+        return
+    end if
+    
+     
+        if ("100" == input(cursor:cursor + 2)) then !Foo
+            allocate(character(len=3) :: lexeme)
+            lexeme = input(cursor:cursor + 2)
+            cursor = cursor + 3
+            return
+        end if
+        
 
-term
-  = string "i"?
-  / range "i"?
-  / id "i"?
-  / endOfInput
-  / "." "i"?
-  / "(" _ block_expression _ ")"  "i"?
-;
+    if ("string" == input(cursor:cursor + 5)) then !Foo
+        allocate( character(len=6) :: lexeme)
+        lexeme = input(cursor:cursor + 5)
+        cursor = cursor + 6
+        return
+    end if
+    
 
-label
-  = arroba? _ id  
-;
+    print *, "error lexico en col ", cursor, ', "'//input(cursor:cursor)//'"'
+    lexeme = "ERROR"
+end function nextSym
+end module tokenizer 
+        
+        
+      
+program test_tokenizer
+    use tokenizer 
+    implicit none
 
-//TOKENS
-integer
-  = digits:[0-9]+ { return parseInt(digits.join(""), 10); }
-;
+    character(len=20) :: input = "100string"
+    integer :: cursor = 1
+    character(len=:), allocatable :: lex
 
-string
-  = "\"" chars:[^\"]* "\"" { return chars.join(""); }
-  / "'" chars:[^']* "'" { return chars.join(""); }
-;
-
-_ "whitespace"
-  = ([ \t\n\r] / singleLineComment / multiLineComment)*
-;
-
-range
-  = "[" inputs:input_range+ "]" { return inputs; }
-;
-
-input_range
-  = start:[^[\]-] "-" end:[^[\]-] { return { type: "range", start, end }; }
-  / value:[^[\]]+ { return value.join(""); }
-;
-
-id "identificador"
-  = [_a-zA-Z] [_a-zA-Z0-9]*
-;
-
-singleLineComment
-  = "//" (![\r\n] .)* [\r\n]?
-;
-
-multiLineComment
-  = "/*" (!("*/") .)* "*/"
-
-signo
-  = "*"
-  / "?"
-  / "+"
-  / "i"
-  / "|" _ (integer / id) _ "|"
-  / "|" _ minmax _ "|"
-  / "|" _ (minmax / integer / id)? _ "," _ block_expression _ "|"
-;
-
-arroba 
-  = "@"
-;
-
-op 
-  = positiveAssertion
-  / negativeAssertion
-  / textExpression
-  / "@"
-;
-
-positiveAssertion
-  = "&" 
-;
-
-negativeAssertion
-  = "!"
-;
-
-textExpression
-  = "$"
-;
-
-//min max
-minmax 
-  = (integer / id)? _ "." _ "." _ (integer / id)? 
-;
+    do
+        lex = nextSym(input, cursor)
+        print *, "Lexema: ", lex
+        if (lex == "EOF" .or. lex == "ERROR") exit
+    end do
+end program test_tokenizer
 
 
-
-endOfInput
-  = "!."
-;

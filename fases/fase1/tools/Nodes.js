@@ -3,7 +3,8 @@ const nodes = {
     Opciones: ['exprs'],
     Union: ['exprs'],
     Expresion: ['expr', 'label', 'qty'],
-    String: ['val', 'isCase']
+    String: ['val', 'isCase'],
+    Integer : ['val'],
 };
 
 export default nodes;
