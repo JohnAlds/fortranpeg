@@ -1,32 +1,40 @@
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.50.0/+esm';
-import { parse } from './parser/gramatica.js';
-import { ErrorReglas } from './parser/error.js';
+import { parse } from './Analyzer/Parser.js';
 
+const resultado = document.querySelector('#resultado')
 
 export let ids = []
 export let usos = []
 export let errores = []
 
+monaco.editor.defineTheme('temaPersonalizado', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+        { token: 'comment', foreground: 'AAAAAA', fontStyle: 'italic' },
+        { token: 'keyword', foreground: 'FF0000', fontStyle: 'bold' },
+        { token: 'string', foreground: '00FF00' }
+    ],
+    colors: {
+        'editor.background': '#1E1E1E',
+        'editor.foreground': '#D4D4D4',
+        'editorCursor.foreground': '#FFFFFF'
+    }
+});
 
-// Crear el editor principal
+// Tema personalizado para el editor
 const editor = monaco.editor.create(
     document.getElementById('editor'), {
         value: '',
-        language: 'java',
-        theme: 'tema',
-        automaticLayout: true
+        language: 'javascript',
+        theme: 'temaPersonalizado',
+        automaticLayout: true,
+        fontSize: 25,
+        wordWrap: 'on',
+        tabSize: 1,
     }
 );
 
-// Crear el editor para la salida
-const salida = monaco.editor.create(
-    document.getElementById('salida'), {
-        value: '',
-        language: 'java',
-        readOnly: true,
-        automaticLayout: true
-    }
-);
 
 let decorations = [];
 
@@ -38,36 +46,34 @@ const analizar = () => {
     errores.length = 0
     try {
         const cst = parse(entrada)
-
+        console.log(cst)
         if(errores.length > 0){
-            salida.setValue(
-                `Error: ${errores[0].message}`
-            );
+            resultado.innerHTML = `
+            <p class=class="text-red-800 text-4xl font-bold bg-red-200 py-4 px-3 rounded-sm ">Errores: ${errores[0].message}</p>            
+            `
             return
         }else{
-            salida.setValue("Análisis Exitoso");
+            // Si el resultado es exitoso
+            resultado.innerHTML = `
+                <p class="text-green-800 text-6xl font-bold bg-green-200 py-5 px-4 rounded-2xl w-full"> Análisis Exitoso!</p>
+            `
         }
-
-        // salida.setValue("Análisis Exitoso");
-        // Limpiar decoraciones previas si la validación es exitosa
         decorations = editor.deltaDecorations(decorations, []);
     } catch (e) {
 
         if(e.location === undefined){
-            
-            salida.setValue(
-                `Error: ${e.message}`
-            );
-
+            resultado.innerHTML = `
+                <p class="text-red-800 text-2xl font-bold bg-red-200 py-4 px-3 rounded-sm text-4xl">
+                Error: ${e.message}
+                </p>
+            `
         }else {
-
-        
-
             // Mostrar mensaje de error en el editor de salida
-            salida.setValue(
-                `Error: ${e.message}\nEn línea ${e.location.start.line} columna ${e.location.start.column}`
-            );
-
+            resultado.innerHTML = `
+                <p class="text-red-800 text-2xl font-bold bg-red-200 py-4 px-3 rounded-sm text-4xl">
+                Error: ${e.message}\nEn línea ${e.location.start.line} columna ${e.location.start.column}
+                </p>
+            `
             // Resaltar el error en el editor de entrada
             decorations = editor.deltaDecorations(decorations, [
                 {
@@ -98,21 +104,9 @@ const analizar = () => {
     }
 };
 
+
+
 // Escuchar cambios en el contenido del editor
 editor.onDidChangeModelContent(() => {
     analizar();
 });
-
-// CSS personalizado para resaltar el error y agregar un warning
-const style = document.createElement('style');
-style.innerHTML = `
-    .errorHighlight {
-        color: red !important;
-        font-weight: bold;
-    }
-    .warningGlyph {
-        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="orange" d="M8 1l7 14H1L8 1z"/></svg>') no-repeat center center;
-        background-size: contain;
-    }
-`;
-document.head.appendChild(style);

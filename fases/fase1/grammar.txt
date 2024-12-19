@@ -1,0 +1,107 @@
+start
+  = instrucciones
+  
+instrucciones
+  = instruccion+
+
+instruccion
+  =  _ production _ ";"?
+;
+
+production
+  = id _ string? _ "=" _ block_expression  _ 
+;
+
+block_expression
+  =  (label _ ":")? _ op? _ term _ signo? ( (label _ ":")? _ op? term _ signo?)*  ( _ "/" _ (label _ ":")? op? _ term _ signo? ( _ ( label _ ":")? _ op?_ term _ signo?)*  )*
+
+term
+  = string "i"?
+  / range "i"?
+  / id "i"?
+  / endOfInput
+  / "." "i"?
+  / "(" _ block_expression _ ")"  "i"?
+;
+
+label
+  = arroba? _ id  
+;
+
+//TOKENS
+integer
+  = digits:[0-9]+ { return parseInt(digits.join(""), 10); }
+;
+
+string
+  = "\"" chars:[^\"]* "\"" { return chars.join(""); }
+  / "'" chars:[^']* "'" { return chars.join(""); }
+;
+
+_ "whitespace"
+  = ([ \t\n\r] / singleLineComment / multiLineComment)*
+;
+
+range
+  = "[" inputs:input_range+ "]" { return inputs; }
+;
+
+input_range
+  = start:[^[\]-] "-" end:[^[\]-] { return { type: "range", start, end }; }
+  / value:[^[\]]+ { return value.join(""); }
+;
+
+id "identificador"
+  = [_a-zA-Z] [_a-zA-Z0-9]*
+;
+
+singleLineComment
+  = "//" (![\r\n] .)* [\r\n]?
+;
+
+multiLineComment
+  = "/*" (!("*/") .)* "*/"
+
+signo
+  = "*"
+  / "?"
+  / "+"
+  / "i"
+  / "|" _ (integer / id) _ "|"
+  / "|" _ minmax _ "|"
+  / "|" _ (minmax / integer / id)? _ "," _ block_expression _ "|"
+;
+
+arroba 
+  = "@"
+;
+
+op 
+  = positiveAssertion
+  / negativeAssertion
+  / textExpression
+  / "@"
+;
+
+positiveAssertion
+  = "&" 
+;
+
+negativeAssertion
+  = "!"
+;
+
+textExpression
+  = "$"
+;
+
+//min max
+minmax 
+  = (integer / id)? _ "." _ "." _ (integer / id)? 
+;
+
+
+
+endOfInput
+  = "!."
+;

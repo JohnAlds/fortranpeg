@@ -1,0 +1,1 @@
+npx peggy -o ./Analyzer/Parser.js --format es ./Analyzer/Parser.pegjs

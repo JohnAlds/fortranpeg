@@ -1,0 +1,32 @@
+:root {
+   --fontPrincipal : "Poppins", serif;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+html {
+    font-size: 62.5%;
+    box-sizing: border-box;
+}
+
+body{
+    background-image: url(assets/forest-masked-guy.png);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    font-family: var(--fontPrincipal);
+}
+
+/* Globales */
+img{
+    width: 100%;
+}
+
+/* Clases */
+
+.container{
+    max-width: 1200px;
+    margin: 0 auto;
+}
