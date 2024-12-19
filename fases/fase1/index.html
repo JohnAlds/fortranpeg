@@ -13,16 +13,22 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="h-screen py-2 px-4">
-
+    
     <!-- HEADER -->
     <header class="flex items-center justify-center gap-4 container bg-black border border-dashed">
-        <h1 class="text-white text-5xl py-7 font-bold tracking-widest">
+        <h1 class="text-white text-4xl py-5 font-bold tracking-widest">
             Frontran-<span>peg</span>
         </h1>
     </header>
 
+    <div class="container flex items-center justify-center">
+        <button class="bg-sky-500 text-white py-4 border border-dashed mt-2 py-3 px-2 rounded-2xl text-2xl font-bold pointer">
+          <a id="btnDownload" download="Module.txt">Descargar Modulo</a> 
+        </button>
+    </div>
+    
     <!-- CONTENT -->
-    <div class="sm:flex sm:flex-row flex flex-col w-full mt-10 h-5/6 container gap-10">
+    <div class="sm:flex sm:flex-row flex flex-col w-full mt-2 h-5/6 container gap-10">
         <!-- EDITOR -->
         <section class="flex flex-col w-full mx-auto  bg-slate-300 text-white">
             <h2 class="text-3xl text-center bg-slate-900 py-4 border border-dashed font-bold uppercase">Gramatica</h2>
@@ -39,10 +45,10 @@
     </div>
     
     <!-- Footer -->
-    <footer class="container bg-black text-white text-center border border-dashed mt-5">
+    <footer class="container bg-black text-white text-center border border-dashed mt-1">
         <p class="text-2xl font-bold py-4 tracking-widest">FortranPEG &copy; 2024 - Grupo 21</p>
     </footer>
     <!-- Script  -->
-    <script type="module" src="index.js"></script>}
+    <script type="module" src="src/index.js"></script>}
 </body>
 </html>

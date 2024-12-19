@@ -1,7 +1,5 @@
-class Node{
-    constructor(){
-        throw new Error('This method is not implement');
+export default class Node {
+    accept(visitor) {
+        throw new Error('Implement this method elsewhere');
     }
 }
-
-export default Node;

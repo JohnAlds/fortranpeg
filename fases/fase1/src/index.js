@@ -1,5 +1,6 @@
 import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.50.0/+esm';
 import { parse } from './Analyzer/Parser.js';
+import Tokenizer from './Visitor/Tokens.js';
 
 const resultado = document.querySelector('#resultado')
 
@@ -44,6 +45,9 @@ const analizar = () => {
     ids.length = 0
     usos.length = 0
     errores.length = 0
+
+    console.log(entrada)
+
     try {
         const cst = parse(entrada)
         console.log(cst)
@@ -53,12 +57,20 @@ const analizar = () => {
             `
             return
         }else{
-            // Si el resultado es exitoso
             resultado.innerHTML = `
-                <p class="text-green-800 text-6xl font-bold bg-green-200 py-5 px-4 rounded-2xl w-full"> Análisis Exitoso!</p>
+            <p class="text-green-800 text-6xl font-bold bg-green-200 py-5 px-4 rounded-2xl w-full"> Análisis Exitoso!</p>
             `
         }
-        decorations = editor.deltaDecorations(decorations, []);
+            // Limpiar errores y resaltados anteriores
+            decorations = editor.deltaDecorations(decorations, []);   
+        
+            // Encapsular la fuciones token en un modulo y descargar el modulo como un archivo texto plano 
+            const tokenizador = new Tokenizer();
+            const fileContents = tokenizador.generateTokenizer(cst);
+            const blob = new Blob([fileContents], {type : 'text/plain'});
+            const url = URL.createObjectURL(blob);
+            const btnDownload = document.querySelector('#btnDownload');
+            btnDownload.href = url;
     } catch (e) {
 
         if(e.location === undefined){
@@ -103,8 +115,6 @@ const analizar = () => {
         
     }
 };
-
-
 
 // Escuchar cambios en el contenido del editor
 editor.onDidChangeModelContent(() => {

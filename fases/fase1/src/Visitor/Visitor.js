@@ -1,8 +1,9 @@
 
+// Auto-generated
 export default class Visitor {
 	visitProducciones(node) {}
 	visitOpciones(node) {}
 	visitUnion(node) {}
-	visitExpression(node) {}
+	visitExpresion(node) {}
 	visitString(node) {}
 }
