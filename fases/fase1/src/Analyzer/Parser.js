@@ -290,6 +290,7 @@ function peg$parse(input, options) {
   };
   var peg$f6 = function(val, isCase) {
     return new n.String(val.replace(/['"]/g, ''), isCase);
+
   };
   var peg$f7 = function(contenido) {
         return `Entrada válida: [${input}]`;

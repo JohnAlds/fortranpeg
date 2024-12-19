@@ -51,6 +51,7 @@ expresiones
   }
   / val:$literales isCase:"i"? {
     return new n.String(val.replace(/['"]/g, ''), isCase);
+
   }
   / "(" _ opciones _ ")"
   / corchetes "i"?
@@ -129,15 +130,9 @@ escape = "'"
 
 secuenciaFinLinea = "\r\n" / "\n" / "\r" / "\u2028" / "\u2029"
 
-// literales = 
-//     "\"" [^"]* "\""
-//     / "'" [^']* "'"
-    
-
 numero = [0-9]+
 
 identificador = [_a-z]i[_a-z0-9]i* { return text() }
-
 
 _ = (Comentarios /[ \t\n\r])*
 

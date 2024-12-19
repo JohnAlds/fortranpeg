@@ -62,3 +62,14 @@ export class String extends Node {
     }
 }
     
+export class Integer extends Node {
+    constructor(val) {
+        super();
+        this.val = val;
+    }
+
+    accept(visitor) {
+        return visitor.visitInteger(this);
+    }
+}
+    
