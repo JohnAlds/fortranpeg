@@ -1,5 +1,3 @@
-// Code compiler module
-
 module tokenizer
 implicit none
 
@@ -10,48 +8,45 @@ function nextSym(input, cursor) result(lexeme)
     character(len=:), allocatable :: lexeme
 
     if (cursor > len(input)) then
-        allocate( character(len=3) :: lexeme )
+        allocate(character(len=3) :: lexeme)
         lexeme = "EOF"
         return
     end if
-    
-     
-        if ("100" == input(cursor:cursor + 2)) then !Foo
-            allocate(character(len=3) :: lexeme)
-            lexeme = input(cursor:cursor + 2)
-            cursor = cursor + 3
-            return
-        end if
-        
 
-    if ("string" == input(cursor:cursor + 5)) then !Foo
-        allocate( character(len=6) :: lexeme)
+    if (cursor + 2 <= len(input) .and. "100" == input(cursor:cursor + 2)) then
+        allocate(character(len=3) :: lexeme)
+        lexeme = input(cursor:cursor + 2)
+        cursor = cursor + 3
+        return
+    end if
+
+    if (cursor + 5 <= len(input) .and. "string" == input(cursor:cursor + 5)) then
+        allocate(character(len=6) :: lexeme)
         lexeme = input(cursor:cursor + 5)
         cursor = cursor + 6
         return
     end if
-    
 
     print *, "error lexico en col ", cursor, ', "'//input(cursor:cursor)//'"'
+    allocate(character(len=5) :: lexeme)
     lexeme = "ERROR"
+    cursor = cursor + 1  ! Avanzar el cursor para continuar procesando
 end function nextSym
-end module tokenizer 
-        
-        
-      
+end module tokenizer
+
 program test_tokenizer
-    use tokenizer 
+    use tokenizer
     implicit none
 
-    character(len=20) :: input = "100string"
+    character(len=:), allocatable :: input
     integer :: cursor = 1
     character(len=:), allocatable :: lex
+
+    input = "100string55xyz100"  ! Entrada de prueba con errores
 
     do
         lex = nextSym(input, cursor)
         print *, "Lexema: ", lex
-        if (lex == "EOF" .or. lex == "ERROR") exit
+        if (lex == "EOF") exit
     end do
 end program test_tokenizer
-
-

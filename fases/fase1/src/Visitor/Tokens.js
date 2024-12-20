@@ -13,7 +13,7 @@ function nextSym(input, cursor) result(lexeme)
     character(len=:), allocatable :: lexeme
 
     if (cursor > len(input)) then
-        allocate( character(len=3) :: lexeme )
+        allocate(character(len=3) :: lexeme)
         lexeme = "EOF"
         return
     end if
@@ -21,9 +21,11 @@ function nextSym(input, cursor) result(lexeme)
     ${grammar.map((produccion) => produccion.accept(this)).join('\n')}
 
     print *, "error lexico en col ", cursor, ', "'//input(cursor:cursor)//'"'
+    allocate(character(len=5) :: lexeme)
     lexeme = "ERROR"
+    cursor = cursor + 1  ! Avanzar el cursor para continuar procesando
 end function nextSym
-end module tokenizer 
+end module tokenizer
         `;
     }
 
@@ -40,8 +42,9 @@ end module tokenizer
         return node.expr.accept(this);
     }
     visitString(node) {
+        
         return `
-    if ("${node.val}" == input(cursor:cursor + ${
+    if (cursor + ${node.val.length - 1} <= len(input) .and. "${node.val}" == input(cursor:cursor + ${
             node.val.length - 1
         })) then !Foo
         allocate( character(len=${node.val.length}) :: lexeme)
@@ -56,7 +59,7 @@ end module tokenizer
         const stringVal = node.val.toString();
         const length = stringVal.length;
         return ` 
-        if ("${stringVal}" == input(cursor:cursor + ${length - 1})) then !Foo
+        if (${stringVal} == input(cursor:cursor + ${length - 1})) then !Foo
             allocate(character(len=${length}) :: lexeme)
             lexeme = input(cursor:cursor + ${length - 1})
             cursor = cursor + ${length}

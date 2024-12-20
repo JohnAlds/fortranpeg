@@ -51,7 +51,6 @@ expresiones
   }
   / val:$literales isCase:"i"? {
     return new n.String(val.replace(/['"]/g, ''), isCase);
-
   }
   / "(" _ opciones _ ")"
   / corchetes "i"?
