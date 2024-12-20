@@ -130,6 +130,7 @@ escape = "'"
 
 secuenciaFinLinea = "\r\n" / "\n" / "\r" / "\u2028" / "\u2029"
 
+// Agregar el segundo parametro
 numero = val:[0-9]+ {
     return new n.Integer(parseInt(val.join('')));
 }

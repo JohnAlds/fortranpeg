@@ -61,11 +61,12 @@ export class String extends Node {
         return visitor.visitString(this);
     }
 }
-    
+// Ya tiene el segundo parametro
 export class Integer extends Node {
-    constructor(val) {
+    constructor(val, instruction) {
         super();
         this.val = val;
+		this.instruction = instruction;
     }
 
     accept(visitor) {
