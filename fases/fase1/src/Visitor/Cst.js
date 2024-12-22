@@ -61,7 +61,7 @@ export class String extends Node {
         return visitor.visitString(this);
     }
 }
-    
+// Ya tiene el segundo parametro
 export class Integer extends Node {
     constructor(val, instruction) {
         super();
