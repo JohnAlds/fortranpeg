@@ -63,13 +63,26 @@ export class String extends Node {
 }
     
 export class Integer extends Node {
-    constructor(val) {
+    constructor(val, instruction) {
         super();
         this.val = val;
+		this.instruction = instruction;
     }
 
     accept(visitor) {
         return visitor.visitInteger(this);
+    }
+}
+    
+export class Rango extends Node {
+    constructor(val, isCase) {
+        super();
+        this.val = val;
+		this.isCase = isCase;
+    }
+
+    accept(visitor) {
+        return visitor.visitRango(this);
     }
 }
     

@@ -50,10 +50,12 @@ expresiones
     usos.push(id)
   }
   / val:$literales isCase:"i"? {
-    return new n.String(val.replace(/['"]/g, ''), isCase);
+    return new n.String(val.replace(/['"]/g, ''), isCase ? true : false);
   }
   / "(" _ opciones _ ")"
-  / corchetes "i"?
+  / val:$corchetes isCase:"i"?{
+    return new n.Rango(val, isCase ? true : false);
+  }
   / "."
   / "!."
   / numero
@@ -130,6 +132,7 @@ escape = "'"
 
 secuenciaFinLinea = "\r\n" / "\n" / "\r" / "\u2028" / "\u2029"
 
+// Agregar el segundo parametro
 numero = val:[0-9]+ {
     return new n.Integer(parseInt(val.join('')));
 }
