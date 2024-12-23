@@ -61,7 +61,7 @@ export class String extends Node {
         return visitor.visitString(this);
     }
 }
-// Ya tiene el segundo parametro
+    
 export class Integer extends Node {
     constructor(val, instruction) {
         super();
@@ -71,18 +71,6 @@ export class Integer extends Node {
 
     accept(visitor) {
         return visitor.visitInteger(this);
-    }
-}
-    
-export class Rango extends Node {
-    constructor(val, isCase) {
-        super();
-        this.val = val;
-		this.isCase = isCase;
-    }
-
-    accept(visitor) {
-        return visitor.visitRango(this);
     }
 }
     

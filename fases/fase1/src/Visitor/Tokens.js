@@ -62,136 +62,143 @@ export default class Tokenizer extends Visitor {
         return node.exprs[0].accept(this);
     }
     visitExpresion(node) {
-        //console.log(node.expr.constructor.name);
-        if(node.expr.constructor.name == "String"){
-            if(node.qty){
-                if(node.qty == "*"){ //hola = "hola"*
+        const isString = node.expr.constructor.name === "String";
+        const isInteger = node.expr.constructor.name === "Integer";
+    
+        if (isString || isInteger) {
+            const exprVal = isString ? node.expr.val : node.expr.val.toString();
+            const exprLength = exprVal.length;
+    
+            if (node.qty) {
+                const c = count(node.qty); 
+    
+                if (c.case === 0) { // |2|
+                    let val = exprVal.repeat(parseInt(c.value, 10));
+                    const condicion = `(cursor + ${val.length - 1} <= len(input) .and. &
+                                        "${val}" == input(cursor:cursor + ${val.length - 1}))`;
                     return `
-                        if ${ node.expr.accept(this).code} then
-                            do while ( .TRUE.)
-                                if ${ node.expr.accept(this).code} then
-                                    lexeme = lexeme // input(cursor:cursor + ${ node.expr.accept(this).length - 1})
-                                    cursor = cursor + ${ node.expr.accept(this).length }
-                                else
-                                    return
-                                end if
-                            end do
+                        if ${condicion} then
+                            allocate(character(len=${val.length}) :: lexeme)
+                            lexeme = "${val}"
+                            cursor = cursor + ${val.length}
+                            return
                         end if
-                    `
-                }else if(node.qty == "+"){
+                    `;
+                } else if (c.case === 1) { // |2..3|
+                    let val = exprVal.repeat(parseInt(c.value1, 10));
+                    const condicion = `(cursor + ${val.length - 1} <= len(input) .and. &
+                                        "${val}" == input(cursor:cursor + ${val.length - 1}))`;
                     return `
-                        if ${ node.expr.accept(this).code} then
-                            do while ( .TRUE.)
-                                if ${ node.expr.accept(this).code} then
-                                    lexeme = lexeme // input(cursor:cursor + ${ node.expr.accept(this).length - 1})
-                                    cursor = cursor + ${ node.expr.accept(this).length }
-                                else
-                                    return
-                                end if
+                        if ${condicion} then
+                            allocate(character(len=${val.length}) :: lexeme)
+                            lexeme = "${val}"
+                            cursor = cursor + ${val.length}
+                            do while ("${exprVal}" == input(cursor:cursor + ${exprLength - 1}) .and. &
+                                     LEN(lexeme) < ${parseInt(c.value2, 10) * exprLength})
+                                lexeme = lexeme // "${exprVal}"
+                                cursor = cursor + ${exprLength}
                             end do
+                            return
                         end if
-                    `
-                }else if(node.qty == "?"){
+                    `;
+                } else if (c.case === 2) { // |2..|
+                    let val = exprVal.repeat(parseInt(c.value1, 10));
+                    const condicion = `(cursor + ${val.length - 1} <= len(input) .and. &
+                                        "${val}" == input(cursor:cursor + ${val.length - 1}))`;
                     return `
-                    if ${node.expr.accept(this).code} then
-                        allocate( character(len=${node.expr.accept(this).length}) :: lexeme)
-                        lexeme = input(cursor:cursor + ${node.expr.accept(this).length - 1})
-                        cursor = cursor + ${node.expr.accept(this).length }
-                        return
-                    end if
-                `
-                }else{
-                    const c = count(node.qty);
-                    const exp = node.expr.accept(this);
-                    
-                    if(c.case == 0){ // "hola"|2|
-                        let val = exp.stringVal.repeat(parseInt(c.value, 10));
-                        const condicion = `(cursor + ${val.length - 1} <= len(input) .and. &\n "${val}" == input(cursor:cursor + ${val.length - 1}))`;
-                        return `
-                            if ${condicion} then
-                                lexeme = "${val}"
-                                cursor = cursor + ${val.length}
-                                return
+                        if ${condicion} then
+                            allocate(character(len=${val.length}) :: lexeme)
+                            lexeme = "${val}"
+                            cursor = cursor + ${val.length}
+                            do while ("${exprVal}" == input(cursor:cursor + ${exprLength - 1}))
+                                lexeme = lexeme // "${exprVal}"
+                                cursor = cursor + ${exprLength}
+                            end do
+                            return
+                        end if
+                    `;
+                } else if (c.case === 3) { // |..3|
+                    return `
+                        do while (cursor + ${exprLength - 1} <= len(input) .and. &
+                                 "${exprVal}" == input(cursor:cursor + ${exprLength - 1}) .and. &
+                                 LEN(lexeme) < ${parseInt(c.value2, 10) * exprLength})
+                            if (.not. allocated(lexeme)) then
+                                allocate(character(len=${exprLength}) :: lexeme)
+                                lexeme = input(cursor:cursor + ${exprLength - 1})
+                            else
+                                lexeme = lexeme // input(cursor:cursor + ${exprLength - 1})
                             end if
-                        `                        
-                    }else if(c.case == 1){ // "hola"|2..3|
-                        let val = exp.stringVal.repeat(parseInt(c.value1, 10));
-                        const condicion = `(cursor + ${val.length - 1} <= len(input) .and. &\n "${val}" == input(cursor:cursor + ${val.length - 1}))`;
-                        return `
-                            if ${condicion} then
-                                lexeme = "${val}"
-                                cursor = cursor + ${val.length}
-                                do while ("${exp.stringVal}" == input(cursor:cursor + ${exp.length - 1}) .and. LEN(lexeme) < ${parseInt(c.value2, 10)*exp.stringVal.length} )
-                                    lexeme = lexeme  // "${exp.stringVal}"
-                                    cursor = cursor + ${exp.length}
-                                end do
-                                return
+                            cursor = cursor + ${exprLength}
+                        end do
+                        if (allocated(lexeme)) then
+                            return
+                        end if
+                    `;
+                } else if (c.case === 4) { // |..|
+                    return `
+                        do while (cursor + ${exprLength - 1} <= len(input) .and. &
+                                 "${exprVal}" == input(cursor:cursor + ${exprLength - 1}))
+                            if (.not. allocated(lexeme)) then
+                                allocate(character(len=${exprLength}) :: lexeme)
+                                lexeme = input(cursor:cursor + ${exprLength - 1})
+                            else
+                                lexeme = lexeme // input(cursor:cursor + ${exprLength - 1})
                             end if
-                        `  
-                    }else if(c.case == 2){// "hola"|2..|
-                        let val = exp.stringVal.repeat(parseInt(c.value1, 10));
-                        const condicion = `(cursor + ${val.length - 1} <= len(input) .and. &\n "${val}" == input(cursor:cursor + ${val.length - 1}))`;
-                        return `
-                            if ${condicion} then
-                                lexeme = "${val}"
-                                cursor = cursor + ${val.length}
-                                do while ("${exp.stringVal}" == input(cursor:cursor + ${exp.length - 1})  )
-                                    lexeme = lexeme  // "${exp.stringVal}"
-                                    cursor = cursor + ${exp.length}
-                                end do
-                                return
-                            end if
-                        `  
-                    }else if(c.case == 3){// "hola"|..3|
-                        let val = exp.stringVal.repeat(parseInt(1, 10));
-                        const condicion = `(cursor + ${val.length - 1} <= len(input) .and. &\n "${val}" == input(cursor:cursor + ${val.length - 1}))`;
-                        return `
-                            if ${condicion} then
-                                lexeme = "${val}"
-                                cursor = cursor + ${val.length}
-                                do while ("${exp.stringVal}" == input(cursor:cursor + ${exp.length - 1}) .and. LEN(lexeme) < ${parseInt(c.value2, 10)*exp.stringVal.length} )
-                                    lexeme = lexeme  // "${exp.stringVal}"
-                                    cursor = cursor + ${exp.length}
-                                end do
-                                return
-                            end if
-                        `  
-                    }else if(c.case == 4){// "hola"|..|
-                        return `
-                            if ${ node.expr.accept(this).code} then
-                                do while ( .TRUE.)
-                                    if ${ node.expr.accept(this).code} then
-                                        lexeme = lexeme // input(cursor:cursor + ${ node.expr.accept(this).length - 1})
-                                        cursor = cursor + ${ node.expr.accept(this).length }
-                                    else
-                                        return
-                                    end if
-                                end do
-                            end if
-                        `
-                    }else if(c.case == 5){
-
-                    }else if(c.case == 6){
-                        
-                    }else if(c.case == 7){
-
-                    }else if(c.case == 8){
-
-                    }else if(c.case == 9){
-
-                    }
+                            cursor = cursor + ${exprLength}
+                        end do
+                        if (allocated(lexeme)) then
+                            return
+                        end if
+                    `;
                 }
-            }else{
-                return `
-                    if ${node.expr.accept(this).code} then
-                        allocate( character(len=${node.expr.accept(this).length}) :: lexeme)
-                        lexeme = input(cursor:cursor + ${node.expr.accept(this).length - 1})
-                        cursor = cursor + ${node.expr.accept(this).length }
+            } else {
+                // Reglas de repetición: *, +, ?
+                if (node.qty === "*") {
+                    return `
+                        do while (cursor + ${exprLength - 1} <= len(input) .and. &
+                                 "${exprVal}" == input(cursor:cursor + ${exprLength - 1}))
+                            if (.not. allocated(lexeme)) then
+                                allocate(character(len=${exprLength}) :: lexeme)
+                                lexeme = input(cursor:cursor + ${exprLength - 1})
+                            else
+                                lexeme = lexeme // input(cursor:cursor + ${exprLength - 1})
+                            end if
+                            cursor = cursor + ${exprLength}
+                        end do
                         return
-                    end if
-                `
+                    `;
+                } else if (node.qty === "+") {
+                    return `
+                        if (cursor + ${exprLength - 1} <= len(input) .and. &
+                            "${exprVal}" == input(cursor:cursor + ${exprLength - 1})) then
+                            do while (cursor + ${exprLength - 1} <= len(input) .and. &
+                                     "${exprVal}" == input(cursor:cursor + ${exprLength - 1}))
+                                if (.not. allocated(lexeme)) then
+                                    allocate(character(len=${exprLength}) :: lexeme)
+                                    lexeme = input(cursor:cursor + ${exprLength - 1})
+                                else
+                                    lexeme = lexeme // input(cursor:cursor + ${exprLength - 1})
+                                end if
+                                cursor = cursor + ${exprLength}
+                            end do
+                            return
+                        end if
+                    `;
+                } else if (node.qty === "?") {
+                    return `
+                        if (cursor + ${exprLength - 1} <= len(input) .and. &
+                            "${exprVal}" == input(cursor:cursor + ${exprLength - 1})) then
+                            allocate(character(len=${exprLength}) :: lexeme)
+                            lexeme = input(cursor:cursor + ${exprLength - 1})
+                            cursor = cursor + ${exprLength}
+                            return
+                        end if
+                    `;
+                }
             }
         }
+    
+        
         return node.expr.accept(this);
     }
     visitString(node) {
