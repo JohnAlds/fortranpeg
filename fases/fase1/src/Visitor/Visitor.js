@@ -1,3 +1,4 @@
+
 // Auto-generated
 export default class Visitor {
 	visitProducciones(node) {}
@@ -6,5 +7,4 @@ export default class Visitor {
 	visitExpresion(node) {}
 	visitString(node) {}
 	visitInteger(node) {}
-	visitRango(node) {}
 }
