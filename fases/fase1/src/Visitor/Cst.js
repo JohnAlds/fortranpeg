@@ -74,3 +74,26 @@ export class Integer extends Node {
     }
 }
     
+export class Clase extends Node {
+    constructor(chars) {
+        super();
+        this.chars = chars;
+    }
+
+    accept(visitor) {
+        return visitor.visitClase(this);
+    }
+}
+    
+export class Rango extends Node {
+    constructor(bottom, top) {
+        super();
+        this.bottom = bottom;
+		this.top = top;
+    }
+
+    accept(visitor) {
+        return visitor.visitRango(this);
+    }
+}
+    

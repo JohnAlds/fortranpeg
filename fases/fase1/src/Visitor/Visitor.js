@@ -7,4 +7,6 @@ export default class Visitor {
 	visitExpresion(node) {}
 	visitString(node) {}
 	visitInteger(node) {}
+	visitClase(node) {}
+	visitRango(node) {}
 }
